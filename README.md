@@ -2,6 +2,19 @@
 
 A full-stack email scheduling platform built for the ReachInbox Software Development Intern assignment.
 
+## 🌐 Live Deployment
+
+### Frontend
+https://reachinbox-frontend-b6w8.onrender.com
+
+### Backend API
+https://reachinbox-backend-rfw6.onrender.com
+
+### GitHub Repository
+https://github.com/vedavenkat2902/reachinbox-email-scheduler
+
+> The frontend and backend are deployed separately on Render.
+
 The application allows users to authenticate with Google, create email campaigns, upload recipient lists, schedule emails for specific times, configure sending delays and hourly limits, and track scheduled and sent emails through a dashboard.
 
 The backend uses Express.js, TypeScript, PostgreSQL, Prisma, BullMQ, Redis, and Nodemailer with Ethereal Email to provide persistent job scheduling, rate limiting, concurrency control, and restart recovery.
@@ -330,6 +343,8 @@ Ethereal provides the SMTP account used for testing. Changing the From address c
 The project uses Nodemailer for SMTP communication and Ethereal Email as the fake SMTP provider.
 
 The configured SMTP credentials are used to create the Nodemailer transporter.
+
+> **Deployment note:** The current backend is hosted on Render's Free web service. Render blocks outbound SMTP traffic on ports 25, 465, and 587 for Free web services. Since Ethereal SMTP uses port 587, direct Ethereal SMTP sending from the current Render Free backend results in an SMTP connection timeout. The scheduler, BullMQ queue, Redis rate limiting, persistence, restart recovery, and email-processing architecture remain implemented; Ethereal SMTP sending works from an environment where outbound SMTP traffic is permitted. See Render's SMTP restriction documentation: https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports
 
 Each email contains:
 
