@@ -5,10 +5,20 @@ import {
   reserveHourlyCapacity,
   reserveSendSlot,
 } from "../services/rate-limit.service";
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  throw new Error("REDIS_URL is not configured");
+}
+
+const redis = new URL(redisUrl);
 
 const connection = {
-  host: "localhost",
-  port: 6379,
+  host: redis.hostname,
+  port: Number(redis.port || 6379),
+  username: redis.username || undefined,
+  password: redis.password || undefined,
+  tls: redis.protocol === "rediss:" ? {} : undefined,
 };
 
 const emailQueue = new Queue("email-queue", {
