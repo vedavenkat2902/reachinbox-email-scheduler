@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 import passport from "../config/passport";
 
 const router = Router();
@@ -9,7 +8,7 @@ router.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
-  }),
+  })
 );
 
 // Google OAuth callback
@@ -19,9 +18,10 @@ router.get(
     failureRedirect: "/login",
   }),
   (_req, res) => {
-  return res.redirect("http://localhost:5173/");
-}
-  
+    return res.redirect(
+      process.env.FRONTEND_URL || "http://localhost:5173/"
+    );
+  }
 );
 
 // Get currently authenticated user
@@ -43,13 +43,17 @@ router.post("/logout", (req, res) => {
   req.logout((logoutError) => {
     if (logoutError) {
       console.error("Logout error:", logoutError);
-      return res.status(500).json({ error: "Failed to log out" });
+      return res.status(500).json({
+        error: "Failed to log out",
+      });
     }
 
     req.session.destroy((sessionError) => {
       if (sessionError) {
         console.error("Session destroy error:", sessionError);
-        return res.status(500).json({ error: "Failed to clear session" });
+        return res.status(500).json({
+          error: "Failed to clear session",
+        });
       }
 
       res.clearCookie("connect.sid");
