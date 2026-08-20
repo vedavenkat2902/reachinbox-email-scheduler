@@ -236,17 +236,17 @@ function Dashboard({ user }: { user: User }) {
 }, []);
 
   async function handleLogout() {
-    try {
-      await fetch("http://localhost:5000/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      window.location.href = "/";
-    }
+  try {
+    await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
+    window.location.href = "/";
   }
+}
 
   async function loadDashboardData() {
     try {
