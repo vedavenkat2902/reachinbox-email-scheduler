@@ -6,12 +6,16 @@ import {
 } from "../services/user.service";
 import { prisma } from "../lib/prisma";
 
+const googleCallbackURL =
+  process.env.GOOGLE_CALLBACK_URL ||
+  "http://localhost:5000/auth/google/callback";
+
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL!,
+      callbackURL: googleCallbackURL,
     },
     async (_accessToken, _refreshToken, profile, done) => {
       try {
@@ -19,7 +23,9 @@ passport.use(
         const email = profile.emails?.[0]?.value;
 
         if (!email) {
-          return done(new Error("Google account email not available"));
+          return done(
+            new Error("Google account email not available")
+          );
         }
 
         let user = await findUserByGoogleId(googleId);
