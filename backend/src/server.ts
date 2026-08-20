@@ -13,6 +13,9 @@ import { startEmailWorker } from "./workers/email.worker";
 
 export const app = express();
 
+// Trust Render's reverse proxy so secure cookies work correctly
+app.set("trust proxy", 1);
+
 const PORT = 5000;
 
 const frontendUrl =
