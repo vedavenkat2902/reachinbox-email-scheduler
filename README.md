@@ -122,7 +122,7 @@ This separation keeps the API responsible for creating jobs while the worker is 
 
 ## 🏗️ Architecture
 
-The application consists of four major components:
+The application consists of five major components:
 
 ### Frontend
 
@@ -166,7 +166,7 @@ The email worker uses BullMQ's configurable concurrency option.
 
 The concurrency can be configured using:
 
-WORKER_CONCURRENCY=5
+    WORKER_CONCURRENCY=5
 
 The default value is 5.
 
@@ -184,19 +184,19 @@ The default delay is 2 seconds.
 
 It can be configured using:
 
-MIN_EMAIL_DELAY_SECONDS=2
+    MIN_EMAIL_DELAY_SECONDS=2
 
 For example:
 
-Email 1 → Send
-      ↓
-   2 seconds
-      ↓
-Email 2 → Send
-      ↓
-   2 seconds
-      ↓
-Email 3 → Send
+    Email 1 → Send
+          ↓
+       2 seconds
+          ↓
+    Email 2 → Send
+          ↓
+       2 seconds
+          ↓
+    Email 3 → Send
 
 The worker reserves the next available sending slot using Redis before sending.
 
@@ -214,12 +214,12 @@ Redis maintains the sending counter using a key based on the sender and the curr
 
 Conceptually:
 
-email-rate:<sender-email>:<hour-window>
+    email-rate:<sender-email>:<hour-window>
 
 For example:
 
-Sender A → 100 emails/hour
-Sender B → 100 emails/hour
+    Sender A → 100 emails/hour
+    Sender B → 100 emails/hour
 
 Sender A's usage does not consume Sender B's hourly capacity.
 
@@ -233,15 +233,15 @@ When a sender reaches the configured hourly limit, the email is not dropped.
 
 Instead, the worker reschedules the job for the next available hour.
 
-Hourly limit reached
-      ↓
-Do not send current email
-      ↓
-Create delayed BullMQ job
-      ↓
-Next available hour
-      ↓
-Process email later
+    Hourly limit reached
+            ↓
+    Do not send current email
+            ↓
+    Create delayed BullMQ job
+            ↓
+    Next available hour
+            ↓
+    Process email later
 
 The scheduled email remains in PostgreSQL and its new BullMQ job ID is stored.
 
@@ -302,8 +302,8 @@ If the email is already marked as SENT, the worker does not send it again.
 
 After successful delivery, the database is updated with:
 
-status = SENT
-sentAt = current timestamp
+    status = SENT
+    sentAt = current timestamp
 
 This prevents already-sent emails from being intentionally sent again during recovery.
 
@@ -401,11 +401,11 @@ Each detected recipient becomes an individual scheduled email in the backend.
 
 For example:
 
-recipients.csv
-  ├── user1@example.com
-  ├── user2@example.com
-  ├── user3@example.com
-  └── user4@example.com
+    recipients.csv
+      ├── user1@example.com
+      ├── user2@example.com
+      ├── user3@example.com
+      └── user4@example.com
 
 Each recipient is scheduled independently.
 
@@ -432,53 +432,56 @@ Each recipient is scheduled independently.
 
 ## 📁 Project Structure
 
-reachinbox-email-scheduler/
-│
-├── backend/
-│   ├── src/
-│   │   ├── lib/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── workers/
-│   │   └── server.ts
-│   │
-│   ├── prisma/
-│   ├── package.json
-│   └── .env
-│
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx
-│   │   ├── api.ts
-│   │   └── ...
-│   │
-│   ├── package.json
-│   └── ...
-│
-└── README.md
+    reachinbox-email-scheduler/
+    │
+    ├── backend/
+    │   ├── src/
+    │   │   ├── lib/
+    │   │   ├── routes/
+    │   │   ├── services/
+    │   │   ├── workers/
+    │   │   └── server.ts
+    │   │
+    │   ├── prisma/
+    │   ├── package.json
+    │   └── .env.example
+    │
+    ├── frontend/
+    │   ├── src/
+    │   │   ├── App.tsx
+    │   │   ├── api.ts
+    │   │   └── ...
+    │   │
+    │   ├── public/
+    │   ├── package.json
+    │   └── ...
+    │
+    └── README.md
+
+> The actual `.env` file is intentionally excluded from the repository. Use `.env.example` as a reference for the required environment variables.
 
 ---
 
 ## 🔧 Environment Variables
 
-Create a .env file inside the backend directory.
+Create a `.env` file inside the backend directory using `.env.example` as a reference.
 
-DATABASE_URL=postgresql://username:password@localhost:5432/reachinbox
+    DATABASE_URL=postgresql://username:password@localhost:5432/reachinbox
 
-REDIS_URL=redis://localhost:6379
+    REDIS_URL=redis://localhost:6379
 
-SMTP_HOST=smtp.ethereal.email
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your_ethereal_username
-SMTP_PASSWORD=your_ethereal_password
+    SMTP_HOST=smtp.ethereal.email
+    SMTP_PORT=587
+    SMTP_SECURE=false
+    SMTP_USER=your_ethereal_username
+    SMTP_PASSWORD=your_ethereal_password
 
-WORKER_CONCURRENCY=5
-MIN_EMAIL_DELAY_SECONDS=2
+    WORKER_CONCURRENCY=5
+    MIN_EMAIL_DELAY_SECONDS=2
 
 Google OAuth and authentication-related variables should also be configured according to the authentication implementation.
 
-Never commit .env files, passwords, OAuth secrets or SMTP credentials to GitHub.
+Never commit `.env` files, passwords, OAuth secrets or SMTP credentials to GitHub.
 
 ---
 
@@ -498,14 +501,14 @@ Docker can also be used to run Redis locally.
 
 ### 1. Clone the Repository
 
-git clone <your-repository-url>
-cd reachinbox-email-scheduler
+    git clone <your-repository-url>
+    cd reachinbox-email-scheduler
 
 ### 2. Start Redis
 
 Using Docker:
 
-docker run --name reachinbox-redis -p 6379:6379 -d redis
+    docker run --name reachinbox-redis -p 6379:6379 -d redis
 
 Or use an existing Redis installation.
 
@@ -513,30 +516,30 @@ The application expects Redis to be available at localhost:6379.
 
 ### 3. Configure PostgreSQL
 
-Create a PostgreSQL database and configure the DATABASE_URL in the backend .env file.
+Create a PostgreSQL database and configure the DATABASE_URL in the backend `.env` file.
 
 ### 4. Configure the Backend
 
-cd backend
-npm install
+    cd backend
+    npm install
 
 Generate Prisma Client:
 
-npx prisma generate
+    npx prisma generate
 
 Apply the database migrations:
 
-npx prisma migrate dev
+    npx prisma migrate dev
 
-Configure the backend .env file.
+Configure the backend `.env` file.
 
 ### 5. Start the Backend
 
-npx tsx watch src/server.ts
+    npx tsx watch src/server.ts
 
 The backend runs on:
 
-http://localhost:5000
+    http://localhost:5000
 
 The BullMQ email worker starts together with the backend.
 
@@ -544,9 +547,9 @@ The BullMQ email worker starts together with the backend.
 
 Open another terminal:
 
-cd frontend
-npm install
-npm run dev
+    cd frontend
+    npm install
+    npm run dev
 
 Open the local URL provided by Vite.
 
@@ -558,18 +561,18 @@ The application uses Ethereal Email for safe email testing.
 
 1. Create an Ethereal Email test account.
 2. Obtain the SMTP credentials.
-3. Add them to the backend .env file.
+3. Add them to the backend `.env` file.
 4. Start the backend.
 5. Schedule an email.
 6. Open the Ethereal mailbox to view the captured email.
 
 SMTP configuration:
 
-SMTP_HOST=smtp.ethereal.email
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your_ethereal_username
-SMTP_PASSWORD=your_ethereal_password
+    SMTP_HOST=smtp.ethereal.email
+    SMTP_PORT=587
+    SMTP_SECURE=false
+    SMTP_USER=your_ethereal_username
+    SMTP_PASSWORD=your_ethereal_password
 
 ---
 
@@ -577,10 +580,10 @@ SMTP_PASSWORD=your_ethereal_password
 
 A campaign can be configured like:
 
-Recipients: 10
-Start Time: 10:00 AM
-Delay: 2 seconds
-Hourly Limit: 100
+    Recipients: 10
+    Start Time: 10:00 AM
+    Delay: 2 seconds
+    Hourly Limit: 100
 
 The backend creates one scheduled email record and one BullMQ job for each recipient.
 
