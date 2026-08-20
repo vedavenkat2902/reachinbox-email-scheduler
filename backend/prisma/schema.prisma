@@ -4,7 +4,53 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
+}
+
+model User {
+  id        String     @id @default(uuid())
+  googleId  String     @unique
+  name      String
+  email     String     @unique
+  avatarUrl String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  campaigns Campaign[]
+}
+
+model Campaign {
+  id           String           @id @default(uuid())
+  userId       String
+  subject      String
+  body         String
+  startTime    DateTime
+  delaySeconds Int
+  hourlyLimit  Int
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emails       ScheduledEmail[]
+
+  @@index([userId])
+}
+
+model ScheduledEmail {
+  id           String      @id @default(uuid())
+  campaignId   String
+  recipient    String
+  senderEmail  String
+  scheduledAt  DateTime
+  sentAt       DateTime?
+  status       EmailStatus @default(SCHEDULED)
+  errorMessage String?
+  jobId        String?     @unique
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  campaign     Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([recipient])
 }
 
 enum EmailStatus {
@@ -12,54 +58,4 @@ enum EmailStatus {
   PROCESSING
   SENT
   FAILED
-}
-
-model User {
-  id        String   @id @default(uuid())
-  googleId  String   @unique
-  name      String
-  email     String   @unique
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  campaigns Campaign[]
-}
-
-model Campaign {
-  id              String   @id @default(uuid())
-  userId          String
-  subject         String
-  body            String
-  startTime       DateTime
-  delaySeconds    Int
-  hourlyLimit     Int
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  emails   ScheduledEmail[]
-
-  @@index([userId])
-}
-
-model ScheduledEmail {
-  id            String      @id @default(uuid())
-  campaignId    String
-  recipient     String
-  senderEmail   String
-  scheduledAt   DateTime
-  sentAt        DateTime?
-  status        EmailStatus @default(SCHEDULED)
-  errorMessage  String?
-  jobId         String?     @unique
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  @@index([campaignId])
-  @@index([status])
-  @@index([scheduledAt])
-  @@index([recipient])
 }
